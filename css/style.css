@@ -1,0 +1,34 @@
+/* Main Page */
+
+.dd {
+    width: 100%;
+}
+
+.dropdown-menu {
+    width: 92%;
+}
+
+.dropdown-toggle {
+    width: 100%;
+    text-align: left;
+}
+
+.background-dd {
+    background-color: #f6f6f6;
+}
+
+.stars {
+    color: gold;
+    font-size: 12px;
+    position: relative;
+    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+}
+
+
+.fot {
+    height: 50px;
+}

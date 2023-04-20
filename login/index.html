@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="../css/bootstrap.min.css" rel="stylesheet"/>
+    <title>Delivery.Eats - Login</title>
+  </head>
+  <body>
+    <!-- Navbar Starts -->
+    <div class="card">
+        <nav class="navbar navbar-expand-lg navbar-light bg-subtle">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="/">Delivery.Eats</a>
+              <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+              >
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <a class="nav-link active" href="/menu">Menu</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link active" href="/order">Order</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link active" href="/cart">Cart</a>
+                  </li>
+                </ul>
+                <form class="d-flex">
+                    <a class="btn btn-outline-secondary" href="/registration" role="button">Register</a>
+                </form>
+              </div>
+            </div>
+          </nav>
+    </div>
+    
+    <!-- Navbar Ends -->
+
+    <!-- Content Starts -->
+
+    <div class="card mx-auto w-50 shadow-sm p-3 mb-5 bg-body rounded">
+      <div class="card-body">
+        <h2 class="card-title">Authorization</h2><br>
+        <form>
+            <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label">Email</label>
+              <input type="email" class="form-control" id="exampleInputEmail1">
+            </div>
+            <div class="mb-3">
+              <label for="exampleInputPassword1" class="form-label">Password</label>
+              <input type="password" class="form-control" id="exampleInputPassword1">
+            </div>
+            <button type="submit" class="btn btn-primary">Log in</button>
+          </form>
+      </div>
+    </div>
+
+    <!-- Content Ends -->
+
+    <script src="../js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
