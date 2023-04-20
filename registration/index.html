@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="../css/bootstrap.min.css" rel="stylesheet" />
+    <title>Delivery.Eats - Register</title>
+    <script
+      src="https://code.jquery.com/jquery-3.6.4.min.js"
+      integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+  </head>
+  <body>
+    <!-- Navbar Starts -->
+    <div class="card">
+      <nav class="navbar navbar-expand-lg navbar-light bg-subtle">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Delivery.Eats</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="/menu">Menu</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/orders">Orders</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/cart"
+                  >Cart
+                  <span
+                    class="bg-success d-inline-block text-white text-center rounded"
+                    style="height: 24px; width: 24px"
+                    id="cartCount"
+                  ></span
+                ></a>
+              </li>
+            </ul>
+
+            <a class="btn btn-outline-secondary" href="/login" role="button"
+              >Log in</a
+            >
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Navbar Ends -->
+
+    <!-- Content Starts -->
+
+    <div class="card mx-auto w-50 shadow-sm p-3 mb-5 bg-body rounded">
+      <div class="card-body">
+        <h2 class="card-title">Register new account</h2>
+        <br />
+        <form id="registrationForm">
+          <!-- Name -->
+          <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input required type="text" class="form-control" id="name" />
+          </div>
+
+          <!-- Gender -->
+          <div class="mb-3">
+            <label for="gender" class="form-label">Gender</label>
+            <select class="form-select" id="gender" required>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="mb-3">
+            <label for="phoneNumber" class="form-label">Phone number</label>
+            <input
+              required
+              type="text"
+              class="form-control"
+              id="phoneNumber"
+              placeholder="+7 (xxx) xxx-xx-xx"
+            />
+          </div>
+
+          <!-- Date of Birth -->
+          <div class="mb-3">
+            <label for="birthDate" class="form-label">Date of birth</label>
+            <input
+              required
+              type="date"
+              class="form-control"
+              id="birthDate"
+              placeholder="dd/mm/yyyy"
+            />
+          </div>
+
+          <!-- Address -->
+          <div class="mb-3">
+            <label for="address" class="form-label">Address</label>
+            <input required type="text" class="form-control" id="address" />
+          </div>
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input required type="email" class="form-control" id="email" />
+            <div id="emailHelp" class="form-text">
+              Email will be used to log in
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input
+              required
+              type="password"
+              class="form-control"
+              id="password"
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Content Ends -->
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/helper.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#phoneNumber").mask("+7 (000) 000-00-00-00");
+
+        $("#registrationForm").submit(function (event) {
+          event.preventDefault();
+
+          var formData = {
+            fullName: $("#name").val(),
+            gender: $("#gender").val(),
+            phoneNumber: $("#phoneNumber").val(),
+            birthDate: $("#birthDate").val(),
+            address: $("#address").val(),
+            email: $("#email").val(),
+            password: $("#password").val(),
+          };
+
+          $.ajax({
+            type: "POST",
+            url: "https://food-delivery.kreosoft.ru/api/account/register",
+            data: JSON.stringify(formData),
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            dataType: "json",
+            encode: true,
+            success: function (response) {
+              localStorage.setItem("token", response.token);
+              window.location.href = "/";
+            },
+            error: function (xhr, status, error) {
+              console.log(xhr, status, error);
+              var errors = xhr.responseJSON;
+              var errorMessage = "";
+
+              for (var key in errors) {
+                if (errors.hasOwnProperty(key)) {
+                  errorMessage += key + " : " + errors[key] + "\n";
+                }
+              }
+              alert(errorMessage);
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

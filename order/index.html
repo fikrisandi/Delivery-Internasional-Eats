@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <title>Delivery.Eats - Orders</title>
+    <script
+      src="https://code.jquery.com/jquery-3.6.4.min.js"
+      integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <!-- Navbar Starts -->
+    <div class="card">
+      <nav class="navbar navbar-expand-lg navbar-light bg-subtle">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Delivery.Eats</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div
+            class="collapse navbar-collapse justify-content-between"
+            id="navbarSupportedContent"
+          >
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="/menu">Menu</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/orders">Orders</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/cart"
+                  >Cart
+                  <span
+                    class="bg-success d-inline-block text-white text-center rounded"
+                    style="height: 24px; width: 24px"
+                    id="cartCount"
+                  ></span
+                ></a>
+              </li>
+            </ul>
+            <div id="header"></div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Navbar Ends -->
+
+    <!-- Content Starts -->
+
+    <div class="card mx-auto w-75 shadow-sm p-3 mb-5 bg-body rounded">
+      <div class="card-body">
+        <div
+          class="bg-light p-2 d-flex justify-content-between border align-items-center"
+        >
+          <h4 id="orderId">Order</h4>
+          <button class="btn btn-outline-success" type="submit" id="confirmBtn">
+            Confirm Order
+          </button>
+        </div>
+        <div class="p-2">
+          <div id="orders">
+            <div id="createdAt">Created At:</div>
+            <div id="deliveryTime">Delivery Time:</div>
+            <div id="address">Delivery Address:</div>
+            <div id="status">Order Status -</div>
+          </div>
+          <div class="mt-3">Item list:</div>
+          <div id="carts"></div>
+          <div class="mt-3" id="totalPrice"><strong>Total: </strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Ends -->
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/nav.js"></script>
+    <script src="/js/helper.js"></script>
+    <script>
+      $(document).ready(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get("id");
+        $("#orderId").text("Order " + id);
+        var token = localStorage.getItem("token");
+        if (token) {
+          $.ajax({
+            url: "https://food-delivery.kreosoft.ru/api/order/" + id,
+            type: "GET",
+            headers: {
+              Authorization: "Bearer " + token,
+              Accept: "application/json",
+            },
+            success: function (order) {
+              const orderTime = new Date(order.orderTime);
+              const deliveryTime = new Date(order.deliveryTime);
+              const isDelivered = order.status == "Delivered";
+              isDelivered ? $("#confirmBtn").hide() : $("#confirmBtn").show();
+
+              $("#createdAt").text(
+                "Created At: " +
+                  orderTime.toLocaleString("ru-RU", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+              );
+              $("#deliveryTime").text(
+                "Delivery Time: " +
+                  deliveryTime.toLocaleString("ru-RU", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+              );
+              $("#address").text("Delivery Address: " + order.address);
+              $("#status").text(
+                "Order Status - " + (isDelivered ? "Delivered" : "In Process")
+              );
+              var totalPrice = 0;
+
+              order.dishes.forEach((item) => {
+                var itemPrice = item.amount * item.price;
+                totalPrice += itemPrice;
+                $("#carts").append(`
+      <div class="d-flex justify-content-between p-2 border">
+                    <div class="d-flex gap-4">
+                      <img
+                        src="${item.image}"
+                        alt=""
+                        class="rounded-5"
+                        style="width: 120px"
+                      />
+                      <div>
+                        <h6>${item.name}</h6>
+                        <p>Price/dish: ${item.price} ₽</p>
+                        <p>Quantity: ${item.amount}</p>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-end">
+                      <strong>Price: </strong> ${itemPrice} ₽
+                    </div>
+                  </div>
+        `);
+              });
+              $("#totalPrice").append(totalPrice + " ₽");
+            },
+            error: function (err) {
+              console.log(err);
+            },
+          });
+
+          $("#confirmBtn").click(function (event) {
+            confirmDelivery(id);
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

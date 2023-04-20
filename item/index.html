@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <link href="../css/bootstrap.min.css" rel="stylesheet" /> -->
+    <title>Delivery.Eats - Item</title>
+
+    <script
+      src="https://code.jquery.com/jquery-3.6.4.min.js"
+      integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+  </head>
+  <body>
+    <!-- Navbar Starts -->
+    <div class="card">
+      <nav class="navbar navbar-expand-lg navbar-light bg-subtle">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Delivery.Eats</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div
+            class="collapse navbar-collapse justify-content-between"
+            id="navbarSupportedContent"
+          >
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="/menu">Menu</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/orders">Orders</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/cart"
+                  >Cart
+                  <span
+                    class="bg-success d-inline-block text-white text-center rounded"
+                    style="height: 24px; width: 24px"
+                    id="cartCount"
+                  ></span
+                ></a>
+              </li>
+            </ul>
+            <div id="header"></div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Navbar Ends -->
+
+    <!-- Content Starts -->
+
+    <div class="card mx-auto w-75 shadow-sm p-3 mb-5 bg-body rounded">
+      <div class="card-body">
+        <h5 class="text-uppercase" id="dishName"></h5>
+        <div class="card d-flex p-2 align-items-center">
+          <img alt="" id="dishImage" class="w-50" />
+          <div id="dishCategory"></div>
+          <div id="isVegetarian"></div>
+          <div id="dishDescription" class="mt-2"></div>
+          <div
+            class="border rounded justify-content-center d-flex p-2 mt-2"
+            id="dishRating"
+          ></div>
+          <div id="userRating" class="my-3 d-flex align-items-center">
+            <select class="selectpicker border rounded"></select>
+            <button class="ml-3 btn btn-primary" id="submitRating">
+              Submit Rating
+            </button>
+          </div>
+          <div id="dishPrice"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Ends -->
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/nav.js"></script>
+    <script src="/js/helper.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get("id");
+
+        $.ajax({
+          url: "https://food-delivery.kreosoft.ru/api/dish/" + id,
+          type: "GET",
+          success: function (data) {
+            $("#dishName").html(data.name);
+            $("#dishImage").attr("src", data.image);
+            $("#dishCategory").html("Dish Category - " + data.category);
+            $("#isVegetarian").html(
+              data.isVegetarian ? "Vegetarian" : "Not vegetarian"
+            );
+            $("#dishDescription").html(data.description);
+            $("#dishRating").html(getRatingHtml(data.rating));
+            $("#dishPrice").html("Price: " + data.price + " ₽");
+          },
+          error: function (error) {
+            console.log(error);
+          },
+        });
+
+        var token = localStorage.getItem("token");
+        if (token) {
+          $("#submitRating").click(function (event) {
+            var rating = $("#userRating select").val();
+            $.ajax({
+              url:
+                "https://food-delivery.kreosoft.ru/api/dish/" +
+                id +
+                "/rating?ratingScore=" +
+                rating,
+              type: "POST",
+              headers: {
+                Authorization: "Bearer " + token,
+                accept: "application/json",
+              },
+              success: function (data) {
+                alert("Rating submitted successfully");
+              },
+              error: function (error) {
+                alert("Rating submission failed");
+              },
+            });
+          });
+
+          $.ajax({
+            url:
+              "https://food-delivery.kreosoft.ru/api/dish/" +
+              id +
+              "/rating/check",
+            type: "GET",
+            headers: {
+              Authorization: "Bearer " + token,
+              accept: "application/json",
+            },
+            success: function (data) {
+              if (!data) {
+                $("#userRating").html("");
+              } else {
+                for (let i = 1; i <= 10; i++) {
+                  $("#userRating select").append(
+                    `<option
+                value="${i}"
+                data-content="${i} <i class='fas fa-star'></i>"
+              ></option>
+                        `
+                  );
+                  $(".selectpicker").selectpicker("refresh");
+                }
+              }
+            },
+            error: function (error) {
+              console.log(error);
+            },
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

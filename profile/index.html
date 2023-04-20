@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="../css/bootstrap.min.css" rel="stylesheet" />
+    <title>Delivery.Eats - Profile</title>
+
+    <script
+      src="https://code.jquery.com/jquery-3.6.4.min.js"
+      integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+  </head>
+  <body>
+    <!-- Navbar Starts -->
+    <div class="card">
+      <nav class="navbar navbar-expand-lg navbar-light bg-subtle">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Delivery.Eats</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="/menu">Menu</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/orders">Orders</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/cart"
+                  >Cart
+                  <span
+                    class="bg-success d-inline-block text-white text-center rounded"
+                    style="height: 24px; width: 24px"
+                    id="cartCount"
+                  ></span
+                ></a>
+              </li>
+            </ul>
+            <div id="header"></div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Navbar Ends -->
+
+    <!-- Content Starts -->
+
+    <div class="card mx-auto w-50 shadow-sm p-3 mb-5 bg-body rounded">
+      <div class="card-body">
+        <h2 class="card-title">Profile</h2>
+        <br />
+        <form id="updateProfile">
+          <!-- Name -->
+          <div class="mb-3 row">
+            <label for="fullName" class="col-sm-2 col-form-label">Name</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="fullName" />
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="mb-3 row">
+            <label for="email" class="col-sm-2 col-form-label">Email</label>
+            <div class="col-sm-10">
+              <input
+                type="text"
+                readonly
+                class="form-control-plaintext"
+                id="email"
+              />
+            </div>
+          </div>
+
+          <!-- Date of Birth -->
+          <div class="mb-3 row">
+            <label for="birthDate" class="col-sm-2 col-form-label"
+              >Date of birth</label
+            >
+            <div class="col-sm-10">
+              <input type="date" class="form-control" id="birthDate" />
+            </div>
+          </div>
+
+          <!-- Gender -->
+          <div class="mb-3 row">
+            <label for="gender" class="col-sm-2 col-form-label">Gender</label>
+            <div class="col-sm-10" id="gender"></div>
+          </div>
+
+          <!-- Home address -->
+          <div class="mb-3 row">
+            <label for="address" class="col-sm-2 col-form-label"
+              >Home address</label
+            >
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="address" />
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="mb-3 row">
+            <label for="phoneNumber" class="col-sm-2 col-form-label"
+              >Phone number</label
+            >
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="phoneNumber" />
+            </div>
+          </div>
+
+          <!-- Save changes button -->
+          <div class="text-end align-items-end">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Content Ends -->
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/nav.js"></script>
+    <script src="/js/helper.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#phoneNumber").mask("+7 (000) 000-00-00-00");
+
+        var token = localStorage.getItem("token");
+        if (token) {
+          const payload = token.split(".")[1];
+          const decodedPayload = JSON.parse(atob(payload));
+          const name = decodedPayload.name;
+          $.ajax({
+            url: "https://food-delivery.kreosoft.ru/api/account/profile",
+            type: "GET",
+            headers: {
+              Authorization: "Bearer " + token,
+              Accept: "text/plain",
+            },
+            success: function (data) {
+              $("#fullName").val(data.fullName);
+              $("#email").val(data.email);
+              $("#birthDate").val(data.birthDate.substring(0, 10));
+              $("#gender").html(data.gender);
+              $("#address").val(data.address);
+              $("#phoneNumber").val(data.phoneNumber);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+              if (jqXHR.status == 401) {
+                localStorage.removeItem("token");
+                window.location.href = "/login";
+              }
+            },
+          });
+        } else {
+          window.location.href = "/login";
+        }
+
+        $("#updateProfile").submit(function (event) {
+          event.preventDefault();
+          var formData = {
+            fullName: $("#fullName").val(),
+            // gender: $("#gender").val(),
+            phoneNumber: $("#phoneNumber").val(),
+            birthDate: $("#birthDate").val(),
+            address: $("#address").val(),
+          };
+
+          $.ajax({
+            url: "https://food-delivery.kreosoft.ru/api/account/profile",
+            type: "PUT",
+            headers: {
+              Authorization: "Bearer " + token,
+              "Content-Type": "application/json",
+              accept: "application/json",
+            },
+            data: JSON.stringify(formData),
+
+            success: function (response) {
+              alert("Profile updated successfully");
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+              alert(jqXHR.responseJSON.message);
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

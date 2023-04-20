@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <title>Delivery.Eats - Purchase</title>
+    <script
+      src="https://code.jquery.com/jquery-3.6.4.min.js"
+      integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <!-- Navbar Starts -->
+    <div class="card">
+      <nav class="navbar navbar-expand-lg navbar-light bg-subtle">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Delivery.Eats</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="/menu">Menu</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/orders">Orders</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/cart"
+                  >Cart
+                  <span
+                    class="bg-success d-inline-block text-white text-center rounded"
+                    style="height: 24px; width: 24px"
+                    id="cartCount"
+                  ></span
+                ></a>
+              </li>
+            </ul>
+            <div id="header"></div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Navbar Ends -->
+
+    <!-- Content Starts -->
+
+    <div class="card mx-auto w-75 shadow-sm p-3 mb-5 bg-body rounded">
+      <div class="card-body">
+        <h4 class="mb-4">Create Order</h4>
+        <form id="orderForm">
+          <h5>User Data</h5>
+          <div class="d-flex gap-2 text-secondary">
+            <div class="bg-light w-50 rounded p-3">
+              <div>Phone Number</div>
+              <div id="phoneNumber" class="fw-bold"></div>
+            </div>
+            <div class="bg-light w-50 rounded p-3">
+              <div>Email</div>
+              <div id="email" class="fw-bold">a</div>
+            </div>
+          </div>
+          <div id="deliveryDetail">
+            <h5>Delivery Data</h5>
+            <div class="d-flex gap-2">
+              <div class="mb-3 w-50">
+                <label for="address" class="form-label">Delivery Address</label>
+                <input required type="text" class="form-control" id="address" />
+              </div>
+              <div class="mb-3 w-50">
+                <label for="deliveryTime" class="form-label">
+                  Delivery Time
+                </label>
+                <input
+                  required
+                  type="datetime-local"
+                  class="form-control"
+                  id="deliveryTime"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="mt-3">Item list:</div>
+          <div id="carts"></div>
+          <div class="mt-3" id="totalPrice"><strong>Total: </strong></div>
+          <button class="btn btn-success" type="submit" id="confirmBtn">
+            Confirm Order
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Content Ends -->
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/nav.js"></script>
+    <script src="/js/helper.js"></script>
+    <script>
+      $(document).ready(function () {
+        var token = localStorage.getItem("token");
+        var totalPrice = 0;
+        if (token) {
+          $.ajax({
+            url: "https://food-delivery.kreosoft.ru/api/basket",
+            type: "GET",
+            headers: {
+              Authorization: "Bearer " + token,
+              Accept: "text/plain",
+            },
+            success: function (items) {
+              items.forEach((item, idx) => {
+                var itemPrice = item.amount * item.price;
+                totalPrice += itemPrice;
+                $("#carts").append(`
+      <div class="d-flex justify-content-between p-2 border">
+                    <div class="d-flex gap-4">
+                      <img
+                        src="${item.image}"
+                        alt=""
+                        class="rounded-5"
+                        style="width: 120px"
+                      />
+                      <div>
+                        <h6>${item.name}</h6>
+                        <p>Price/dish: ${item.price} ₽</p>
+                        <p>Quantity: ${item.amount}</p>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-end">
+                      <strong>Price: </strong> ${itemPrice} ₽
+                    </div>
+                  </div>
+        `);
+              });
+              $("#totalPrice").append(totalPrice + " ₽");
+              if (totalPrice == 0) {
+                $("#deliveryDetail").hide();
+                $("#confirmBtn").hide();
+                $("#carts").append(`
+                      <div class="d-flex justify-content-center p-2 border">
+                      <h5>Cart is empty</h5>
+                      </div>
+                      `);
+              }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+              if (jqXHR.status == 401) {
+                localStorage.removeItem("token");
+                window.location.href = "/login";
+              }
+            },
+          });
+        } else {
+          window.location.href = "/login";
+        }
+
+        $.ajax({
+          url: "https://food-delivery.kreosoft.ru/api/account/profile",
+          type: "GET",
+          headers: {
+            Authorization: "Bearer " + token,
+            Accept: "text/plain",
+          },
+          success: function (data) {
+            $("#email").html(data.email);
+            $("#phoneNumber").html(data.phoneNumber);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 401) {
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }
+          },
+        });
+
+        $("#orderForm").submit(function (event) {
+          event.preventDefault();
+          const currentDate = new Date();
+
+          var formData = {
+            address: $("#address").val(),
+            deliveryTime: $("#deliveryTime").val(),
+          };
+
+          if (new Date(formData.deliveryTime) < currentDate) {
+            alert("Please select a future date and time.");
+            return false;
+          }
+
+          $.ajax({
+            url: "https://food-delivery.kreosoft.ru/api/order",
+            method: "POST",
+            headers: {
+              Authorization: "Bearer " + token,
+              accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            data: JSON.stringify(formData),
+            dataType: "json",
+            success: function (response) {
+              alert("Order created successfully!");
+              window.location.href = "/orders";
+            },
+            error: function (error) {
+              if (error.status == 200) {
+                alert("Order created successfully!");
+                window.location.href = "/orders";
+              }
+              location.reload();
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

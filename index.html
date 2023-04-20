@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <link href="css/bootstrap.min.css" rel="stylesheet" /> -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css"
+    />
+
+    <title>Delivery.Eats - Main Page</title>
+
+    <script
+      src="https://code.jquery.com/jquery-3.6.4.min.js"
+      integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <!-- Navbar Starts -->
+    <div class="card">
+      <nav class="navbar navbar-expand-lg navbar-light bg-subtle">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Delivery.Eats</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div
+            class="collapse navbar-collapse justify-content-between"
+            id="navbarSupportedContent"
+          >
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="/menu">Menu</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/orders">Orders</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/cart"
+                  >Cart
+                  <span
+                    class="bg-success d-inline-block text-white text-center rounded"
+                    style="height: 24px; width: 24px"
+                    id="cartCount"
+                  ></span
+                ></a>
+              </li>
+            </ul>
+            <div id="header"></div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Navbar Ends -->
+
+    <!-- Content Starts -->
+
+    <div class="card mx-auto w-75 shadow-sm p-3 mb-5 bg-body rounded">
+      <div class="card-body">
+        <div class="d-flex justify-content-between border rounded p-2">
+          <div class="d-flex gap-2">
+            <select class="selectpicker form-select" id="category" multiple>
+              <option value="Wok">Wok</option>
+              <option value="Pizza">Pizza</option>
+              <option value="Soup">Soup</option>
+              <option value="Dessert">Dessert</option>
+              <option value="Drink">Drink</option>
+            </select>
+            <select
+              class="selectpicker form-select ml-3"
+              aria-label="Default select example"
+              id="sorting"
+            >
+              <option value="NameAsc">A-Z</option>
+              <option value="NameDesc">Z-A</option>
+              <option value="PriceAsc">Price Asc</option>
+              <option value="PriceDesc">Price Desc</option>
+              <option value="RatingAsc">Rating Asc</option>
+              <option value="RatingDesc">Rating Desc</option>
+            </select>
+            <div
+              class="custom-control custom-switch d-flex align-items-center ml-4"
+            >
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="vegetarianSwitch"
+              />
+              <label
+                class="custom-control-label text-nowrap"
+                for="vegetarianSwitch"
+                >Show only vegetarian dishes</label
+              >
+            </div>
+          </div>
+          <button class="btn btn-primary" id="filterButton">
+            Apply filters
+          </button>
+        </div>
+        <div class="row" id="menu"></div>
+        <nav aria-label="Page navigation example" class="mt-4">
+          <ul class="pagination" id="pagination"></ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Content Ends -->
+
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="/js/helper.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        var token = localStorage.getItem("token");
+        var queryString = window.location.search;
+        var sPageURL = window.location.search.substring(1),
+          sURLVariables = sPageURL.split("&"),
+          sParameterName,
+          i;
+
+        const urlParams = new URLSearchParams(queryString);
+
+        const categories = urlParams.getAll("categories");
+        const isVegetarian = urlParams.get("vegetarian") === "true";
+        const sorting = urlParams.get("sorting");
+        var page = parseInt(urlParams.get("page"));
+
+        if (!page) {
+          page = 1;
+        }
+
+        categories.forEach((category) => {
+          $(`#category option[value="${category}"]`).prop("selected", true);
+        });
+
+        if (isVegetarian) {
+          $("#vegetarianSwitch").prop("checked", true);
+        }
+
+        if (sorting) {
+          $(`#sorting option[value="${sorting}"]`).prop("selected", true);
+        }
+
+        $(".selectpicker").selectpicker("refresh");
+
+        var fetchQuery = "?";
+        if (categories.length > 0) {
+          fetchQuery += "categories=" + categories.join("&categories=");
+          fetchQuery += "&";
+        }
+        if (isVegetarian) fetchQuery += "vegetarian=" + isVegetarian + "&";
+        if (sorting) fetchQuery += "sorting=" + sorting + "&";
+        fetchQuery += "page=" + page;
+
+        $.ajax({
+          url: "https://food-delivery.kreosoft.ru/api/dish" + fetchQuery,
+          type: "GET",
+          dataType: "json",
+          headers: {
+            accept: "application/json",
+          },
+          success: function (response) {
+            $.each(response.dishes, function (index, dish) {
+              var starHtml = getRatingHtml(dish.rating);
+
+              var html = `<div class="col-sm-4 mt-4">
+                <div class="d-flex flex-column h-100">
+                <img
+                  src="${dish.image}"
+                  alt=""
+                  class="w-100 border rounded-top"
+                />
+                <div class="p-2 border flex-grow-1" onclick="window.location.href='/item/?id=${
+                  dish.id
+                }'">
+                  <h5 class="text-uppercase">${dish.name} ${
+                dish.vegetarian ? '<i class="fa-solid fa-leaf"></i>' : ""
+              }</h5>
+                  <div>Dish Category - ${dish.category}</div>
+                  <div class="border rounded justify-content-center d-flex p-2">
+                   ${starHtml}
+                  </div>
+                  <div>
+                    ${dish.description}
+                  </div>
+                </div>
+                <div
+                  class="bg-light p-2 d-flex justify-content-between border align-items-center rounded-bottom"
+                >
+                  <span> Price - ${dish.price} ₽ </span>
+                  <button type="button" onclick="AddToCart('${
+                    dish.id
+                  }')" class="btn btn-primary${
+                token ? "" : " disabled"
+              }">Add to card</button>
+                </div>
+                </div>
+              </div>`;
+              $("#menu").append(html);
+            });
+
+            var currentPage = response.pagination.current;
+            var lastPage = response.pagination.count;
+            var paginationHtml = "";
+
+            fetchQuery = fetchQuery.replace("page=" + page, "");
+            for (let i = 1; i <= lastPage; i++) {
+              if (i == currentPage) {
+                paginationHtml += `<li class="page-item active"><a class="page-link" href="">${i}</a></li>`;
+              } else {
+                paginationHtml += `<li class="page-item"><a class="page-link" href="${fetchQuery}page=${i}">${i}</a></li>`;
+              }
+            }
+
+            $("#pagination").html(`
+<li class="page-item">
+      <a class="page-link" href="${
+        page > 1 ? `${fetchQuery}page=${i}` : ""
+      }" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Previous</span>
+      </a>
+    </li>
+    ${paginationHtml}
+    <li class="page-item">
+      <a class="page-link" href="${
+        page < lastPage ? `${fetchQuery}page=${i}` : ""
+      }" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Next</span>
+      </a>
+    </li>
+`);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 401) {
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }
+          },
+        });
+
+        $("#filterButton").click(function (event) {
+          const category = $("#category").val();
+          const sorting = $("#sorting").val();
+          const vegetarian = $("#vegetarianSwitch").prop("checked");
+          let url = "?";
+
+          if (category.length) {
+            url += `categories=${category.join("&categories=")}&`;
+          }
+          if (sorting) {
+            url += `sorting=${sorting}&`;
+          }
+          if (vegetarian) {
+            url += `vegetarian=true&`;
+          }
+          if (url.endsWith("&")) url = url.slice(0, -1);
+          if (url == "?") url = "";
+          window.location.href = url;
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <title>Delivery.Eats - Order</title>
+    <script
+      src="https://code.jquery.com/jquery-3.6.4.min.js"
+      integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <!-- Navbar Starts -->
+    <div class="card">
+      <nav class="navbar navbar-expand-lg navbar-light bg-subtle">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Delivery.Eats</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div
+            class="collapse navbar-collapse justify-content-between"
+            id="navbarSupportedContent"
+          >
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="/menu">Menu</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/orders">Orders</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/cart"
+                  >Cart
+                  <span
+                    class="bg-success d-inline-block text-white text-center rounded"
+                    style="height: 24px; width: 24px"
+                    id="cartCount"
+                  ></span
+                ></a>
+              </li>
+            </ul>
+            <div id="header"></div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Navbar Ends -->
+
+    <!-- Content Starts -->
+
+    <div class="card mx-auto w-75 shadow-sm p-3 mb-5 bg-body rounded">
+      <div class="card-body">
+        <div
+          id="currentOrder"
+          class="border rounded py-2 px-4 d-flex align-items-center justify-content-between"
+        >
+          <span>An order can be created with the items in the cart</span>
+          <button
+            class="btn btn-success"
+            onclick="window.location.href = '/purchase'"
+          >
+            Create order
+          </button>
+        </div>
+        <h5 class="mt-4">Previous Orders</h5>
+        <div id="orders"></div>
+      </div>
+    </div>
+
+    <!-- Content Ends -->
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/nav.js"></script>
+    <script src="/js/helper.js"></script>
+    <script>
+      $(document).ready(function () {
+        var count = 0;
+        var token = localStorage.getItem("token");
+        if (token) {
+          $.ajax({
+            url: "https://food-delivery.kreosoft.ru/api/basket",
+            type: "GET",
+            headers: {
+              Authorization: "Bearer " + token,
+              Accept: "text/plain",
+            },
+            success: function (data) {
+              data.forEach(function (item) {
+                count += item.amount;
+              });
+              if (count == 0) {
+                $("#currentOrder").removeClass();
+                $("#currentOrder").html("");
+              }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+              if (jqXHR.status == 401) {
+                localStorage.removeItem("token");
+                window.location.href = "/login";
+              }
+            },
+          });
+
+          $.ajax({
+            url: "https://food-delivery.kreosoft.ru/api/order",
+            type: "GET",
+            headers: {
+              Authorization: "Bearer " + token,
+              Accept: "application/json",
+            },
+            success: function (data) {
+              data.forEach((order) => {
+                const orderTime = new Date(order.orderTime);
+                const deliveryTime = new Date(order.deliveryTime);
+                const date = orderTime.getDate();
+                const month = orderTime.getMonth();
+                const year = orderTime.getFullYear();
+                const isDelivered = order.status == "Delivered";
+
+                $("#orders").append(`
+                <div class="border d-flex justify-content-between p-2">
+            <div>
+              <a href='/order/?id=${order.id}'>
+                <strong> Order from ${orderTime.toLocaleDateString("ru-RU", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                })}</strong>
+              </a>
+              <div>Order Status - ${
+                isDelivered ? "Delivered" : "In Process"
+              }</div>
+              <div>Delivery time ${deliveryTime.toLocaleDateString("ru-RU", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}</div>
+            </div>
+            <div class="d-flex justify-content-between flex-column">
+              ${
+                isDelivered
+                  ? ""
+                  : `<button class="btn btn-outline-success" onclick="confirmDelivery('${order.id}')">Confirm Delivery</button>`
+              }
+              <div><strong> Total Order Cost: </strong> ${order.price} ₽</div>
+            </div>
+          </div>
+                `);
+              });
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+              if (jqXHR.status == 401) {
+                localStorage.removeItem("token");
+                window.location.href = "/login";
+              }
+            },
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
