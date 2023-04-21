@@ -1,21 +1,21 @@
 function getRatingHtml(rating) {
-  var fullStar = Math.floor(rating);
-  var halfStar = rating - fullStar;
-  var halfStarCount = 0;
+  var fullStar = Math.round(rating);
+  // var halfStar = rating - fullStar;
+  // var halfStarCount = 0;
 
-  if (halfStar > 0.25 && halfStar < 0.75) halfStarCount = 1;
-  else fullStar += 1;
+  // if (halfStar > 0.25 && halfStar < 0.75) halfStarCount = 1;
+  // else fullStar += 1;
 
-  var emptyStar = 10 - fullStar - halfStarCount;
+  var emptyStar = 10 - fullStar; // - halfStarCount;
 
   var starHtml = "";
   for (var i = 0; i < fullStar; i++) {
-    starHtml += '<i class="fa-solid fa-star text-warning"></i>';
+    starHtml += '<i class="fa-solid fa-star text-primary"></i>';
   }
 
-  if (halfStarCount > 0) {
-    starHtml += '<i class="fa-solid fa-star-half-stroke text-warning"></i>';
-  }
+  // if (halfStarCount > 0) {
+  //   starHtml += '<i class="fa-solid fa-star-half-stroke text-primary"></i>';
+  // }
 
   for (var i = 0; i < emptyStar; i++) {
     starHtml += '<i class="fa-solid fa-star"></i>';
@@ -124,4 +124,28 @@ function confirmDelivery(orderId) {
       },
     });
   }
+}
+
+function submitRating(rating, id, canRate) {
+  var token = localStorage.getItem("token");
+  if (token && canRate)
+    $.ajax({
+      url:
+        "https://food-delivery.kreosoft.ru/api/dish/" +
+        id +
+        "/rating?ratingScore=" +
+        rating,
+      type: "POST",
+      headers: {
+        Authorization: "Bearer " + token,
+        accept: "application/json",
+      },
+      success: function (data) {
+        alert("Rating submitted successfully");
+        location.reload();
+      },
+      error: function (error) {
+        alert("Rating submission failed");
+      },
+    });
 }
